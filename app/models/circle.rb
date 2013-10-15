@@ -20,7 +20,8 @@ class Circle
     url = "#{BASE_URI}/me?circle-token=#{@token}"
     BW::HTTP.get(url, { :headers => default_headers }) do |response|
       result_data = BW::JSON.parse(response.body.to_str) rescue nil
-      result_data = [] if result_data.nil? or result_data.empty?
+      result_data = {} if result_data.nil? or result_data.empty?
+      result_data.merge!({'token' => @token})
       block.call Me.new(result_data)
     end
   end

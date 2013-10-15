@@ -42,7 +42,7 @@ class LoginViewController < UIViewController
     circle = Circle.shared_instance
     circle.token = input_field.text
     circle.me do |me|
-      alert_error unless me.is_a?(Me)
+      alert_error unless me.is_a?(Me) and me.send(:valid?)
       if me.token
         defaults = NSUserDefaults.standardUserDefaults
         defaults['user'] ||= {}
