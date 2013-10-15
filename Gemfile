@@ -10,6 +10,6 @@ gem 'bubble-wrap', '1.3.0.osx'
 # gem 'motion-testflight'
 gem 'dotenv'
 gem 'ib'
-gem 'cocoapods', '0.16.4'
-gem 'motion-cocoapods'
+# gem 'cocoapods', '0.16.4'
+gem "motion-cocoapods", :github => "HipByte/motion-cocoapods"
 gem 'rm-digest'
