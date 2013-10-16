@@ -2,7 +2,7 @@ class Circle
 
   BASE_URI = 'https://circleci.com/api/v1'
 
-  attr_accessor :token
+  attr_accessor :token, :cached_images
 
   def initialize
     @token = nil
@@ -42,6 +42,18 @@ class Circle
       result_data = [] if result_data.nil? or result_data.empty?
       block.call result_data.map { |attrs| Project.new attrs }
     end
+  end
+
+  def self.cached_gravatars
+    @cached_images ||= {}
+  end
+
+  def self.cache!(key, image)
+    cached_gravatars[key] = image
+  end
+
+  def self.cached(key)
+    cached_gravatars[key]
   end
 
 end
