@@ -10,15 +10,9 @@ class ProfileViewController < UIViewController
     super
     # Do any additional setup after loading the view.
     defaults = NSUserDefaults.standardUserDefaults
-    user     = defaults['user']
-    email    = user['email']
-    token    = user['token']
-    if user and email
-      image_data = NSData.dataWithContentsOfURL(NSURL.URLWithString(gravatar(email)))
-      profile_image_view.image = UIImage.imageWithData(image_data)
-    end
-    email_label.text = "#{email}"
-    token_label.text = "#{token}"
+    user = defaults['user']
+    email_label.text = "#{user['email']}"
+    token_label.text = "#{user['token']}"
   end
 
   def viewDidUnload
@@ -28,15 +22,6 @@ class ProfileViewController < UIViewController
 
   def shouldAutorotateToInterfaceOrientation(interfaceOrientation)
     interfaceOrientation == UIInterfaceOrientationPortrait
-  end
-
-  def gravatar(email)
-    gravatar_id = RmDigest::MD5.hexdigest email.to_s.downcase
-    gravatar_for_id(gravatar_id)
-  end
-
-  def gravatar_for_id(gid, size = 30)
-    "http://www.gravatar.com/avatar/#{gid}?s=#{size}"
   end
 
 end
