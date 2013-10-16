@@ -1,16 +1,15 @@
 class RecentTableViewController < UITableViewController
 
-  attr_accessor :builds, :pullToRefreshView
+  attr_accessor :builds
 
   def viewDidLoad
     super
-    self.pullToRefreshView = SSPullToRefreshView.alloc.initWithScrollView self.tableView, delegate:self
+    self.refreshControl.addTarget(self, action: 'refresh', forControlEvents: UIControlEventValueChanged)
     defaults = NSUserDefaults.standardUserDefaults
+    bg_img = UIImage.imageNamed 'cream_dust.png'
+    self.view.backgroundColor = UIColor.colorWithPatternImage bg_img
     user = defaults['user']
-    if user and user['token']
-      pullToRefreshView.startLoadingAndExpand(true)
-      refresh
-    end
+    refresh if user and user['token']
   end
 
   def viewDidUnload
@@ -24,7 +23,7 @@ class RecentTableViewController < UITableViewController
     circle.token ||= user['token']
     circle.recent_builds do |builds|
       @builds = builds.dup
-      self.pullToRefreshView.finishLoading
+      self.refreshControl.endRefreshing
       view.reloadData
     end
   end
@@ -61,10 +60,13 @@ class RecentTableViewController < UITableViewController
     end
 
     build = @builds[indexPath.row]
-    cell.build_label.text = "##{build.build_num} [#{build.branch}]"
+    cell.build_label.text = build.repo_name
     cell.status_view.backgroundColor = build.status_color
     cell.subject_label.text = build.subject.to_s
     cell.committer_label.text = build.username
+    gimage = Circle.cached build.gravatar(60)
+    gimage = build.cache_gravatar! unless gimage
+    cell.avatar_view.image = gimage
     cell.selectionStyle = UITableViewCellSelectionStyleNone
     cell
   end
@@ -79,15 +81,11 @@ class RecentTableViewController < UITableViewController
     # self.navigationController.pushViewController(detailViewController, animated:true)
   end
 
-## Pull to refresh delegate
+## Refresh Control Actions
 
   def refresh
-   self.pullToRefreshView.startLoading
-   load_recent_builds
+    self.refreshControl.beginRefreshing
+    load_recent_builds
   end
-
-  def pullToRefreshViewDidStartLoading(view)
-   self.refresh
- end
 
 end

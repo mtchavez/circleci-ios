@@ -1,16 +1,15 @@
 class ProjectsTableViewController < UITableViewController
 
-  attr_accessor :projects, :pullToRefreshView
+  attr_accessor :projects
 
   def viewDidLoad
     super
-    self.pullToRefreshView = SSPullToRefreshView.alloc.initWithScrollView self.tableView, delegate:self
+    self.refreshControl.addTarget(self, action: 'refresh', forControlEvents: UIControlEventValueChanged)
     defaults = NSUserDefaults.standardUserDefaults
+    bg_img = UIImage.imageNamed 'cream_dust.png'
+    self.view.backgroundColor = UIColor.colorWithPatternImage bg_img
     user = defaults['user']
-    if user and user['token']
-      pullToRefreshView.startLoadingAndExpand(true)
-      refresh
-    end
+    refresh if user and user['token']
   end
 
   def viewDidUnload
@@ -18,21 +17,26 @@ class ProjectsTableViewController < UITableViewController
   end
 
   def load_projects
+    @projects = Hash.new []
     defaults = NSUserDefaults.standardUserDefaults
     user = defaults['user']
     circle = Circle.shared_instance
     circle.token ||= user['token']
-    circle.all_projects do |projects|
-      @projects = projects.dup.map do |proj|
-        proj.all_branches.map do |b|
-          branch_info = proj.branches[b]
+    all_projects = []
+    circle.all_projects do |projs|
+      all_projects = projs.dup
+      all_projects.each do |proj|
+        all_branches = ['master'] + proj.all_branches.take(5)
+        all_branches.uniq.each do |branch|
+          branch_info = proj.branches[branch]
           next if branch_info['recent_builds'].to_a.empty?
-          branch_info.merge!('name' => b)
+          branch_info.merge!('name' => branch)
           attrs = Project::PROJ_ATTRS.inject({}) { |hash, attr| hash[attr] = proj.send(attr); hash }
-          Project.new attrs.merge('branch_info' => branch_info)
+          proj = Project.new attrs.merge('branch_info' => branch_info)
+          @projects[proj.repo_name] += [proj]
         end
-      end.flatten.compact
-      self.pullToRefreshView.finishLoading
+      end
+      self.refreshControl.endRefreshing
       view.reloadData
     end
   end
@@ -44,11 +48,16 @@ class ProjectsTableViewController < UITableViewController
 ## Table view data source
 
   def numberOfSectionsInTableView(tableView)
-    1
+    @projects.keys.size
   end
 
   def tableView(tableView, numberOfRowsInSection:section)
-    @projects.to_a.size
+    key = @projects.keys[section]
+    @projects[key].size
+  end
+
+  def tableView(tableView, titleForHeaderInSection:section)
+    @projects.keys[section]
   end
 
   def tableView(tableView, cellForRowAtIndexPath:indexPath)
@@ -58,8 +67,10 @@ class ProjectsTableViewController < UITableViewController
       cell
     end
 
-    project = @projects[indexPath.row]
-    cell.name_label.text = project.repo_name
+    section, row = indexPath.section, indexPath.row
+    key = @projects.keys[section]
+    projects = @projects[key]
+    project = projects[row]
     cell.branch_label.text = project.branch_name
     cell.setup_build_views(project)
     cell.selectionStyle = UITableViewCellSelectionStyleNone
@@ -75,15 +86,11 @@ class ProjectsTableViewController < UITableViewController
     # self.navigationController.pushViewController(detailViewController, animated:true)
   end
 
-## Pull to refresh delegate
+## Refresh Control Actions
 
    def refresh
-    self.pullToRefreshView.startLoading
+    self.refreshControl.beginRefreshing
     load_projects
    end
-
-   def pullToRefreshViewDidStartLoading(view)
-    self.refresh
-  end
 
 end

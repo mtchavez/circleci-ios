@@ -6,5 +6,6 @@ class BuildViewCell < UITableViewCell
   outlet :status_view
   outlet :subject_label
   outlet :committer_label
+  outlet :avatar_view
 
 end
