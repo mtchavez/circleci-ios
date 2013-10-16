@@ -19,7 +19,6 @@ Motion::Project::App.setup do |app|
   app.interface_orientations = [:portrait]
   app.prerendered_icon       = true
   app.pods do
-    pod 'SSPullToRefresh'
     pod 'MD5Digest'
   end
 

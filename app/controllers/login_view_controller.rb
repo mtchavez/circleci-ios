@@ -49,7 +49,6 @@ class LoginViewController < UIViewController
         defaults['user'] = defaults['user'].merge({'token' => me.token, 'email' => me.selected_email, 'login' => me.login})
         defaults.synchronize
         self.delegate.dismissViewControllerAnimated:true, completion: nil
-        self.delegate.pullToRefreshView.startLoadingAndExpand(true)
         self.delegate.refresh
       else
         alert_error
