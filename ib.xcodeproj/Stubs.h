@@ -43,7 +43,6 @@
 -(IBAction) shouldAutorotateToInterfaceOrientation:(id) interfaceOrientation;
 -(IBAction) numberOfSectionsInTableView:(id) tableView;
 -(IBAction) refresh;
--(IBAction) pullToRefreshViewDidStartLoading:(id) view;
 
 @end
 
@@ -55,7 +54,6 @@
 -(IBAction) shouldAutorotateToInterfaceOrientation:(id) interfaceOrientation;
 -(IBAction) numberOfSectionsInTableView:(id) tableView;
 -(IBAction) refresh;
--(IBAction) pullToRefreshViewDidStartLoading:(id) view;
 
 @end
 
@@ -104,6 +102,8 @@
 @property IBOutlet id build1_view;
 @property IBOutlet id build2_view;
 @property IBOutlet id build3_view;
+@property IBOutlet id build4_view;
+@property IBOutlet id build5_view;
 
 -(IBAction) setup_build_views:(id) project;
 
