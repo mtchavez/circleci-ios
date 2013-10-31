@@ -13,7 +13,7 @@ Dotenv.load
 Motion::Project::App.setup do |app|
   # Use `rake config' to see complete project settings.
   app.name = 'CircleCI'
-  app.version = '1.1'
+  app.version = '1.2'
   app.identifier = ENV['APP_ID']
   app.frameworks += ['UIKit']
   app.deployment_target      = '5.0'
