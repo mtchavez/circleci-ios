@@ -5,15 +5,37 @@ class RecentTableViewController < UITableViewController
   def viewDidLoad
     super
     self.refreshControl.addTarget(self, action: 'refresh', forControlEvents: UIControlEventValueChanged)
-    defaults = NSUserDefaults.standardUserDefaults
     bg_img = UIImage.imageNamed 'cream_dust.png'
     self.view.backgroundColor = UIColor.colorWithPatternImage bg_img
-    user = defaults['user']
-    refresh if user and user['token']
+    add_observers
+    Me.verify_user
+    @builds = []
   end
 
   def viewDidUnload
     super
+    App.notification_center.unobserve 'CircleVerifiedUser'
+    App.notification_center.unobserve 'CircleUnverifiedUser'
+  end
+
+  def add_observers
+    App.notification_center.observe 'CircleVerifiedUser' do |notification|
+      get_builds(notification.object)
+    end
+
+    App.notification_center.observe 'CircleUnverifiedUser' do |notification|
+      show_login(notification.object)
+    end
+  end
+
+  def get_builds(sender)
+    refresh
+  end
+
+  def show_login(sender)
+    loginView = LoginViewController.new.initWithNibName 'LoginView', bundle: nil
+    loginView.delegate = self
+    self.tabBarController.presentViewController(loginView, animated:false, completion:nil)
   end
 
   def load_recent_builds
@@ -22,20 +44,17 @@ class RecentTableViewController < UITableViewController
     circle = Circle.shared_instance
     circle.token ||= user['token']
     circle.recent_builds do |builds|
-      @builds = builds.dup
+      if builds == ['unauthorized']
+        @builds = []
+      else
+        @builds = builds.dup
+      end
       self.refreshControl.endRefreshing
       view.reloadData
     end
   end
 
   def viewDidAppear(animated)
-    defaults = NSUserDefaults.standardUserDefaults
-    user = defaults['user']
-    unless user and user['token']
-      loginView = LoginViewController.new.initWithNibName 'LoginView', bundle: nil
-      loginView.delegate = self
-      self.tabBarController.presentViewController(loginView, animated:false, completion:nil)
-    end
   end
 
   def shouldAutorotateToInterfaceOrientation(interfaceOrientation)

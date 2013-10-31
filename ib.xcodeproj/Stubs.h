@@ -32,7 +32,6 @@
 -(IBAction) viewDidLoad;
 -(IBAction) viewDidUnload;
 -(IBAction) shouldAutorotateToInterfaceOrientation:(id) interfaceOrientation;
--(IBAction) gravatar:(id) email;
 
 @end
 

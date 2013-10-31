@@ -10,6 +10,7 @@ class ProjectsTableViewController < UITableViewController
     self.view.backgroundColor = UIColor.colorWithPatternImage bg_img
     user = defaults['user']
     refresh if user and user['token']
+    @projects = Hash.new []
   end
 
   def viewDidUnload
@@ -24,6 +25,12 @@ class ProjectsTableViewController < UITableViewController
     circle.token ||= user['token']
     all_projects = []
     circle.all_projects do |projs|
+      next if projs.nil? or projs.empty?
+      if projs == ['unauthorized']
+         self.refreshControl.endRefreshing
+         view.reloadData
+         break
+      end
       all_projects = projs.dup
       all_projects.each do |proj|
         all_branches = ['master'] + proj.all_branches.take(5)

@@ -2,10 +2,11 @@ class Circle
 
   BASE_URI = 'https://circleci.com/api/v1'
 
-  attr_accessor :token, :cached_images
+  attr_accessor :token, :cached_images, :verified
 
   def initialize
     @token = nil
+    @verified = false
   end
 
   def self.shared_instance
@@ -31,7 +32,12 @@ class Circle
     BW::HTTP.get(url, { :headers => default_headers }) do |response|
       result_data = BW::JSON.parse(response.body.to_str) rescue nil
       result_data = [] if result_data.nil? or result_data.empty?
-      block.call result_data.map { |attrs| Build.new attrs }
+      if result_data.is_a?(Hash) and result_data['message'].match(/login|log in/i)
+        Circle.shared_instance.verified = false
+        block.call ['unauthorized']
+      else
+        block.call result_data.map { |attrs| Build.new attrs }
+      end
     end
   end
 
@@ -40,7 +46,12 @@ class Circle
     BW::HTTP.get(url, { :headers => default_headers }) do |response|
       result_data = BW::JSON.parse(response.body.to_str) rescue nil
       result_data = [] if result_data.nil? or result_data.empty?
-      block.call result_data.map { |attrs| Project.new attrs }
+      if result_data.is_a?(Hash) and result_data['message'].match(/login|log in/i)
+        Circle.shared_instance.verified = false
+        block.call ['unauthorized']
+      else
+        block.call result_data.map { |attrs| Project.new attrs }
+      end
     end
   end
 

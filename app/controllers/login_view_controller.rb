@@ -44,6 +44,7 @@ class LoginViewController < UIViewController
     circle.me do |me|
       alert_error unless me.is_a?(Me)
       if me.send(:valid?)
+        Circle.shared_instance.verified = true
         defaults = NSUserDefaults.standardUserDefaults
         defaults['user'] ||= {}
         defaults['user'] = defaults['user'].merge({'token' => me.token, 'email' => me.selected_email, 'login' => me.login})

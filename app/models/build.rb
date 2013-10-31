@@ -25,7 +25,7 @@ class Build
   end
 
   def gravatar(size=60)
-    email = user['email']
+    email = user ? user['email'] : ''
     gid = RmDigest::MD5.hexdigest email.to_s.downcase
     "http://www.gravatar.com/avatar/#{gid}?s=#{size}"
   end
